@@ -99,7 +99,7 @@ runEvolution
   gameVar <- newMVar =<< toIO (gameFromGenoms 4 2 startGenoms)
   scoreLog <- new
   --ageLog <- new
-  guiFromWidget (gameToWidget gameVar 
+  guiFromWidget (translate 300 0 (gameToWidget gameVar) 
             <:> avgWidget 10 scoreLog (-700, -0) (300, 300) 
             -- <:> plotToWidget ageLog (-700, -600) (300, 300)
             <:> confWidget configs)
@@ -131,6 +131,7 @@ runEvolution
   evoLoop startGenoms
   
   where gameFromGenoms boardSize strength = createGame boardSize . map (phenotype strength)
+
 
 
 {- MENDING -}   

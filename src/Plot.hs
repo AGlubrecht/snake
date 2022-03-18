@@ -3,8 +3,24 @@
 module Plot where
 
 import Graphics.Gloss.Interface.IO.Interact
-import Graphics.Gloss.Interface.IO.Game
-import Graphics.Gloss
+    ( black,
+      red,
+      white,
+      color,
+      line,
+      scale,
+      Display(InWindow),
+      Key(Char),
+      KeyState(Down),
+      Event(EventKey),
+      Color,
+      Picture(Pictures),
+      Point )
+
+
+import Graphics.Gloss.Interface.IO.Game ( playIO )
+
+import qualified Graphics.Gloss.Interface.IO.Interact as Gloss
 
 import Control.Concurrent ( MVar, ThreadId, modifyMVar_, swapMVar, forkIO, newMVar )
 
@@ -38,7 +54,7 @@ avgWidget inertia (Plot as) (x, y) (w, h) = Widget
   (\log -> do
     newElems <- swapMVar as mempty
     return $ log <> newElems)
-  (\log -> translate x y . scale w h . graphLines [black, red] $ [0:log, 0:runningAvg inertia log])
+  (\log -> Gloss.translate x y . scale w h . graphLines [black, red] $ [0:log, 0:runningAvg inertia log])
   (const return)
 
 plotToWidget :: Plotable a => Plot a -> Point -> Point -> Widget a
@@ -47,7 +63,7 @@ plotToWidget (Plot a) (x, y) (w, h) = Widget
   (\log -> do
     newElems <- swapMVar a mempty
     return $ log <> newElems)
-  (translate x y . scale w h . draw)
+  (Gloss.translate x y . scale w h . draw)
   (const return)
 
 graphLines :: [Color] -> [[Float]] -> Picture
@@ -147,6 +163,9 @@ data Widget a = Widget {
     b' <- b_onEvent e b
     return (a', b') 
   )
+
+translate :: Float -> Float -> Widget a -> Widget a
+translate offsetX offsetY widget = widget{_draw = Gloss.translate offsetX offsetY . _draw widget}
 
 guiFromWidget :: Widget a -> IO ThreadId
 guiFromWidget (Widget _initial _update _draw _onEvent) = forkIO $ playIO 
