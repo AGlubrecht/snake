@@ -34,6 +34,8 @@ import Plot    ( Widget(Widget) )
 
 
 
+{- GAME -}
+
 gameToWidget :: MVar Game -> Float -> Widget Game
 gameToWidget gameVar gameSize = Widget
   emptyGame
@@ -42,47 +44,6 @@ gameToWidget gameVar gameSize = Widget
   (\case
     (EventKey (SpecialKey KeyUp) Down _ _) -> const (readMVar gameVar)
     _                                      -> return)
-  
-
-bufferedAnimation :: Game -> IO ()
-bufferedAnimation initialGame = do
-  frameVar <- newMVar initialGame
-
-  workerThread <- forkIO (computeFrames frameVar)
-  animateFrames frameVar
-  where 
-    computeFrames frameVar = forever $ do
-      frame <- readMVar frameVar
-      let frame' = gameStep frame
-      swapMVar frameVar (seq (ttl (arrBoard frame' ! (0 :|: 0))) frame')
-
-
-animateFrames :: MVar Game -> IO ()
-animateFrames frameVar = playIO
-  windowDisplay
-  white
-  frameRate
-  initialModel
-  drawingFunc
-  inputHandler
-  updateFunc
-  where
-    initialModel :: ()
-    initialModel = ()
-
-    drawingFunc :: () -> IO Picture
-    drawingFunc () = do
-      frame <- readMVar frameVar
-      return (drawGame frame)
-
-    inputHandler :: Event -> () -> IO ()
-    inputHandler _ = return
-
-    updateFunc ::  Float -> () -> IO ()
-    updateFunc _ = return
-
-    windowDisplay :: Display
-    windowDisplay = InWindow "Window" (1000, 1000) (10, 10)
 
 
 drawGame :: Game -> Picture
@@ -144,6 +105,7 @@ colorOf (SnakeHead i _) = intToColor i
 colorOf (Snek col _)    = blue--col
 
 
+
 {- DYNAMIC GRAPH -}
 
 drawList :: Point -> Point -> [Float] -> Picture 
@@ -157,6 +119,7 @@ drawList corner (w, h) list =
 updateList :: MVar [Float] -> [Float] -> IO [Float]   
 updateList channel list = (list ++) <$> swapMVar channel []
 --takes new elements out of the channel (isn't ++the wrong way around?)
+
 
 
 {- GENERAL -}
