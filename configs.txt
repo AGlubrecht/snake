@@ -1,6 +1,6 @@
 Configs {
   strength = 3,
-  mRates = [0.1, 0.3, 1],
+  mRates = [1, 0.3, 1],
   gameLength = 200,
   snakesPerGame = 1,
   boardSize = 3,

@@ -58,7 +58,7 @@ r1 = runEvolution
     (createGame 2 1)
     (\gameLength -> map (fromIntegral . score) . players . flip (!!) gameLength . iterate gameStep)
     (`gameToWidget` screenRadius)
-    dnnVariance
+    dnnInfo
     7
     40
 
@@ -70,23 +70,22 @@ r2 = runEvolution
     (createGame 2 1) ---
     (\gameLength -> map (fromIntegral . score) . players . flip (!!) gameLength . iterate gameStep)
     (`gameToWidget` screenRadius)
-    {-last --(mean . map abs . concatMap unshape)--}dnnVariance
+    dnnInfo
     7  --core_count 
     40--15 --games_per_core
 
 
 
 runEvolution :: 
-  Show info =>
      Contingent genom -> ([Float] -> [genom] -> [Float] -> Contingent [genom])  
   -> (Int -> genom -> phenotype) -> (Int -> [phenotype] -> Contingent game) -> (Int -> game -> [Float])
-  -> (MVar game -> Widget game) -> ([genom] -> info)
+  -> (MVar game -> Widget game) -> ([Float] -> [genom] -> String)
   -> Int -> Int -> IO ()
 
 runEvolution
   randomGenom evoStep 
   phenotype createGame scoreGame 
-  gameToWidget variance
+  gameToWidget info
   core_count games_per_core = do
 
   genCounter <- newIORef 0
@@ -117,11 +116,9 @@ runEvolution
         --print gameLength
         let fitnesses = concat gameResults
         --print fitnesses
-        putStrLn $ "Generation: "  ++  show             currGenCount
-              ++ " Max fitness: "  ++ (show . maximum)  fitnesses
-              ++ " Mean fitness: " ++ (show . mean)     fitnesses
-              ++ " Variance: "     ++ (show . variance) currentGenoms
-              ++ " Snakes: "       ++ (show . length)   fitnesses
+        putStrLn $ "Generation: " ++  show currGenCount
+              ++ info fitnesses currentGenoms
+
         --ageLog += [mean ages]
         scoreLog += [mean fitnesses]
 
@@ -143,11 +140,6 @@ dnnMeanCrossover :: (DNN, DNN) -> Contingent DNN
 dnnMeanCrossover (DNN f a, DNN _ b) = DNN f <$> bernoulliPick 
                                         0.9 (a, map (fmap pairMean) 
                                                 (zipWith zipMatrices a b)) 
-
-
-dnnVariance :: [DNN] -> Float
-dnnVariance = variance . map unshape
-
 
 
 

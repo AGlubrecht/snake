@@ -9,7 +9,7 @@ import Control.Monad ( (<=<) )
 import Data.Matrix   ( Matrix, colVector, fromLists, getCol, multStd, toList, toLists, zero )
 
 import Types         ( actions, Action, CellState(Appel, Wall, Snek, SnakeHead) )
-import Util          ( (..<), fat1 )
+import Util          ( (..<), fat1, mean )
 import Random        ( Contingent )
 import Evo           ( Evolving(..) )
 
