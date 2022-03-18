@@ -3,7 +3,6 @@ module Analytics where
 import Util      ( (..<), mean )
 import Data.List ( transpose )
 
---statistics
 
 meanList :: [[Float]] -> [Float]
 meanList = map mean <$> transpose

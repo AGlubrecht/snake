@@ -48,18 +48,18 @@ gameToWidget gameVar gameSize = Widget
 
 drawGame :: Game -> Picture
 drawGame game = Pictures [
-  drawBorder,
-  drawBackGround,
-  drawAppels, 
-  drawHeads,
-  drawSnake
+    drawBorder,
+    drawBackGround,
+    drawAppels, 
+    drawHeads,
+    drawSnake
   ]
   where
-    drawBorder = color (greyN 0.5) . translate (-0.5 * cellSize) 0 $ rectangleSolid (2+2*cellSize) (2+2*cellSize)
-    drawBackGround =    color blue . translate (-0.5 * cellSize) 0 $ rectangleSolid 2 2
+    drawBorder     = color (greyN 0.5) . translate (-0.5 * cellSize) 0 $ rectangleSolid (2+2*cellSize) (2+2*cellSize)
+    drawBackGround = color blue        . translate (-0.5 * cellSize) 0 $ rectangleSolid  2              2
 
-    drawAppels = color red . Pictures . map (\pos -> drawCell cellSize pos (Appel 0)) . Vec.toList . apples $ game
-    
+    drawAppels     = color red . Pictures . map (\pos -> drawCell cellSize pos (Appel 0)) . Vec.toList . apples $ game
+
     drawHeads = Pictures
       [drawCell cellSize (Seq.index (snake player) 0) (SnakeHead (score player) 1) 
                                   | player <- players game, status player == Alive]
@@ -94,8 +94,8 @@ drawPiece width (x1, y1) (x2, y2) = translate minx miny (rectangleUpperSolid dx 
   where
     minx = min x1 x2 + fat1 (y1 == y2) * width --fat1 means if y1 == y2 then width else 0
     miny = min y1 y2 -width/2
-    dx = abs (x1-x2) +width 
-    dy = abs (y1-y2) +width
+    dx   = abs (x1-x2) +width 
+    dy   = abs (y1-y2) +width
 
 colorOf :: CellState -> Color
 colorOf Clear           = blue
