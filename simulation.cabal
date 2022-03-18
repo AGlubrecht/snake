@@ -1,0 +1,98 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.4.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: f06eb1e4dcf4adab885e3306959c38702424474c97f9d440ff3fb41a854f0ae3
+
+name:           simulation
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/simulation#readme>
+homepage:       https://github.com/githubuser/simulation#readme
+bug-reports:    https://github.com/githubuser/simulation/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2021 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/simulation
+
+library
+  exposed-modules:
+      Analytics
+      CA
+      Config
+      Display
+      Evo
+      Fragments
+      Game
+      Lattice
+      Navigation
+      NeuralNet
+      Plot
+      Random
+      Runner
+      Strategies
+      Types
+      Util
+      EulerPrelude
+  other-modules:
+      Paths_simulation
+  hs-source-dirs:
+      src
+      ..\interpolation\src
+  build-depends:
+      array
+    , base >=4.7 && <5
+    , containers
+    , deepseq
+    , gloss
+    , matrix
+    , mtl
+    , parallel
+    , random
+    , random-shuffle
+    , sort
+    , split
+    , vector
+  default-language: Haskell2010
+
+executable simulation-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_simulation
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      array
+    , base >=4.7 && <5
+    , containers
+    , gloss
+    , random
+    , simulation
+  default-language: Haskell2010
+
+test-suite simulation-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_simulation
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      array
+    , base >=4.7 && <5
+    , gloss
+    , random
+    , simulation
+  default-language: Haskell2010
