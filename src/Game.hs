@@ -33,7 +33,7 @@ import Lattice ( getRandomCoords, up, addP, toAbs, fromArr, toArr, toPick, toEnv
 {- INITIALIZATION -}
 
 createGame :: Int -> Int -> Int -> [Policy] -> Contingent Game
-createGame startLength appleCount boardSize policies = do
+createGame appleCount startLength boardSize policies = do
 
   coords <- nub <$> getRandomCoords boardSize 
             `asserting` [(2*boardSize)^2 > appleCount + length policies]  
@@ -61,7 +61,7 @@ createGame startLength appleCount boardSize policies = do
 startB :: Int -> [Position] -> [Position] -> Int -> ArrBoard 
 startB boardSize applesPos headsPos startLength = emptyBoard // (apples ++ heads)
   where 
-    emptyBoard = toArr boardSize (const Clear)
+    emptyBoard = toArr (boardSize+1) (const Clear)
     apples = zip applesPos (map Appel [0..]) 
     heads = zip headsPos (map (SnakeHead startLength) [0..])
 

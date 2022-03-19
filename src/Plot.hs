@@ -113,13 +113,16 @@ data Configs = Configs {
   gameLength :: Int,
   snakesPerGame :: Int,
   boardSize :: Int,
-  fitnessPressure :: Float
+  fitnessPressure :: Float,
+  appleCount :: Int,
+  startLength :: Int,
+  growing :: Bool
 } deriving (Show, Read)
 
 
 confWidget :: MVar Configs -> Widget Configs
 confWidget confVar = Widget
-  (Configs 0 [1, 2, 3, 4, 5] 0 0 4 0)
+  (Configs 0 [1, 2, 3, 4, 5] 0 0 4 0 1 3 True)
   return
   (const $ Pictures [])
   (\case

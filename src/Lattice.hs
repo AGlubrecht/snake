@@ -29,7 +29,7 @@ fromPair :: (Int, Int) -> Position
 fromPair (x, y) = x:|:y
 
 getRandomCoords :: Int -> Contingent [Position]
-getRandomCoords boardSize = (getRandomR . unzip . repeat . boundsOf) (boardSize-1)
+getRandomCoords = getRandomR . unzip . repeat . boundsOf
 
 instance Random Position where
   random g = (rx:|:ry, g'')

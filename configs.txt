@@ -1,8 +1,11 @@
 Configs {
   strength = 3,
-  mRates = [1, 0.03, 0.5],
-  gameLength = 100,
+  mRates = [0.5, 0.03, 1],
+  gameLength = 1600,
   snakesPerGame = 1,
-  boardSize = 3,
-  fitnessPressure = 0
+  boardSize = 5,
+  fitnessPressure = 81,
+  appleCount = 4,
+  startLength = 80,
+  growing = False
 }

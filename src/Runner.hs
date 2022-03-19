@@ -1,7 +1,8 @@
 module Runner where
 
---high-score: b4: 16
+--high-score: b4: 16 90%
 --            b3: 11
+--            b5: Median 44
 
 
 --incorporate phases into ca model somehow
@@ -29,6 +30,7 @@ import Data.IORef
 import Control.Parallel.Strategies
 import Control.Monad.State
 import Data.List.Split
+import Data.Foldable
 
 import Types
 import NeuralNet
@@ -45,6 +47,8 @@ import Util
 import Config
 import Random
     ( Contingent, pickFromPair, toIO, cLifter, bernoulliPick )
+import Data.Foldable (maximumBy)
+import GHC.Base (VecElem(Int16ElemRep))
 
 
 
@@ -55,30 +59,35 @@ r1 = runEvolution
     (return $ zeroDNN reLU [dimension (surrounding 3 (const Clear)), 3, dimension L])
     (evoStep . mutate)
     (const $ fromPureP . phaseify . perceiver (surrounding 3))
-    (createGame 2 1)
+    (createGame)
     (\gameLength -> map (fromIntegral . score) . players . flip (!!) gameLength . iterate gameStep)
     (`gameToWidget` screenRadius)
     dnnInfo
     7
     40
 
-r2 :: IO ()
+{- 
+Mit entsprechendem Training findet der Perceiver auf Karten mit n <=5 zuverlässig einen Hamiltonkreis
+Z.b. mit Rate [0.5, 0.01, 1] und einer dreiknotigen Zwischenebene
+-}
+
+{-r2 :: IO ()
 r2 = runEvolution
     ({-randomDNN-}return $ zeroDNN reLU [cdim*2{-}, cdim + cdim `div` 2-}, cdim]) --initGenom
     (evoStep . mutate) --evoStep
     ((fromPureP . strictPhaseify) ..< runCA) --phenotype
-    (createGame 2 1) ---
+    (flip createGame 1) ---
     (\gameLength -> map (fromIntegral . score) . players . flip (!!) gameLength . iterate gameStep)
     (`gameToWidget` screenRadius)
     dnnInfo
     7  --core_count 
-    40--15 --games_per_core
+    40--15 --games_per_core-}
 
 
 
 runEvolution :: 
      Contingent genom -> ([Float] -> [genom] -> [Float] -> Contingent [genom])  
-  -> (Int -> genom -> phenotype) -> (Int -> [phenotype] -> Contingent game) -> (Int -> game -> [Float])
+  -> (Int -> genom -> phenotype) -> (Int -> Int -> Int -> [phenotype] -> Contingent game) -> (Int -> game -> [Float])
   -> (MVar game -> Widget game) -> ([Float] -> [genom] -> String)
   -> Int -> Int -> IO ()
 
@@ -91,11 +100,11 @@ runEvolution
   genCounter <- newIORef 0
   cLift <- cLifter ---unneccessary
 
-  configs <- newMVar (Configs 3 [0.5, 1, 1]  100 1 4 0) --actual start configurationt
+  configs <- newMVar (Configs 3 [0.5, 1, 1]  100 1 4 0 1 3 True) --actual start configurationt
   batchSize <- (core_count * games_per_core *) . snakesPerGame <$> readMVar configs 
   startGenoms <- toIO $ replicateM batchSize randomGenom
   
-  gameVar <- newMVar =<< toIO (gameFromGenoms 4 2 startGenoms)
+  gameVar <- newMVar =<< toIO (gameFromGenoms 1 3 4 2 startGenoms)
   scoreLog <- new
   --ageLog <- new
   guiFromWidget (translate 300 0 (gameToWidget gameVar) 
@@ -104,15 +113,26 @@ runEvolution
             <:> confWidget configs)
   print 0
   let evoLoop currentGenoms = do
-        (Configs strength mRates gameLength snakes_per_game boardSize fitnessPressure) <- readMVar configs
+        (Configs 
+          strength 
+          mRates 
+          gameLength 
+          snakes_per_game 
+          boardSize 
+          fitnessPressure 
+          appleCount 
+          startLength
+          growing) <- readMVar configs
         let batchSize = core_count * games_per_core * snakes_per_game
         currGenCount <- readIORef genCounter
         --print 1
-        games <- (toIO . mapM (gameFromGenoms boardSize strength). chunksOf snakes_per_game) currentGenoms
+        games <- (toIO . mapM (gameFromGenoms appleCount startLength boardSize strength). chunksOf snakes_per_game) currentGenoms
         --print 2
-        swapMVar gameVar (head games)
         let gameResults = scoreGame gameLength <$> games
                         `using` parListChunk games_per_core rdeepseq
+
+        swapMVar gameVar ((fst . argMax (maximum . snd)) (zip games gameResults))
+        
         --print gameLength
         let fitnesses = concat gameResults
         --print fitnesses
@@ -127,8 +147,13 @@ runEvolution
 
   evoLoop startGenoms
   
-  where gameFromGenoms boardSize strength = createGame boardSize . map (phenotype strength)
+  where gameFromGenoms appleCount startLength boardSize strength = createGame appleCount startLength boardSize . map (phenotype strength)
 
+
+foo = (argMax (maximum . snd)) (zip games gameResults)
+ where
+   games = undefined :: [Int]
+   gameResults = undefined :: [[Float]]
 
 
 {- MENDING -}   
