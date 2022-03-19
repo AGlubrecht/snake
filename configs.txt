@@ -1,7 +1,7 @@
 Configs {
   strength = 3,
-  mRates = [1, 0.3, 1],
-  gameLength = 200,
+  mRates = [1, 0.03, 0.5],
+  gameLength = 100,
   snakesPerGame = 1,
   boardSize = 3,
   fitnessPressure = 0

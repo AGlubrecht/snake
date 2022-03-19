@@ -52,9 +52,9 @@ import Random
 
 r1 :: IO ()
 r1 = runEvolution
-    (return $ zeroDNN reLU [dimension (surrounding 3 (const Clear)), {-6,-} dimension L])
-    (evoStep{-2 dnnMeanCrossover-} . mutate)
-    (const $ fromPureP . strictPhaseify . perceiver (surrounding 3))
+    (return $ zeroDNN reLU [dimension (surrounding 3 (const Clear)), 3, dimension L])
+    (evoStep . mutate)
+    (const $ fromPureP . phaseify . perceiver (surrounding 3))
     (createGame 2 1)
     (\gameLength -> map (fromIntegral . score) . players . flip (!!) gameLength . iterate gameStep)
     (`gameToWidget` screenRadius)

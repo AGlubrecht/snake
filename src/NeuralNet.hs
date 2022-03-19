@@ -1,6 +1,5 @@
 module NeuralNet where
 
-
 import qualified Data.Vector as Vec
 
 import Data.List     ( maximumBy, transpose )
@@ -68,7 +67,7 @@ instance Show DNN where
   show (DNN _ weightMatrices) = "DNN: " ++ show weightMatrices
 
 instance Evolving DNN where
-  mutate rates (DNN f c) = DNN f <$> mutate rates c
+  mutate rates (DNN f c) = normalize <$> (DNN f <$> mutate rates c)
 
 
 run :: (Quantifyable a, Quantifyable b) => DNN -> a -> b
@@ -96,6 +95,8 @@ unshape = toList <=< _weights
 zipMatrices :: Matrix b -> Matrix b -> Matrix (b, b)
 zipMatrices = fromLists . map (uncurry zip) ..< (zip `on` toLists)
 
+normalize :: DNN -> DNN 
+normalize (DNN f layers) = DNN f ((\layer -> (/max 1 (mean (abs <$> layer))) <$> layer) <$> layers)
 
 
 {- ACTIVATION FUNCTIONS -}

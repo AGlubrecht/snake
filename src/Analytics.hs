@@ -28,6 +28,7 @@ dnnVariance = variance . map unshape
 meanWeight :: DNN -> Float
 meanWeight = mean . map abs . unshape
 
+
 {- GENERAL -}
 
 meanList :: [[Float]] -> [Float]
