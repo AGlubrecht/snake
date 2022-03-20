@@ -39,6 +39,19 @@ data Game = Game {
   clearcount :: Int
 }
 
+data StartSettings = StartSettings {
+  appleCount :: Int,
+  startLength :: Int,
+  boardSize :: Int
+} deriving(Show, Read)
+
+data GameSettings = GameSettings {
+  fitnessPressure :: Float,
+  growing :: Bool,
+  gameLength :: Int,
+  startSettings :: StartSettings
+} deriving (Show, Read)
+
 data Player = Player {
   _id  :: Int,
   score :: Int,

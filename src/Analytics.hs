@@ -1,8 +1,7 @@
 module Analytics where
 
 
-import Numeric
-
+import Numeric ( showFFloat )
 import Util      ( (..<), mean, len )
 import Data.List ( transpose, sort )
 import NeuralNet

@@ -3,9 +3,11 @@ Configs {
   mRates = [0.5, 0.03, 1],
   gameLength = 1600,
   snakesPerGame = 1,
-  boardSize = 5,
-  fitnessPressure = 81,
-  appleCount = 4,
-  startLength = 80,
-  growing = False
+  fitnessPressure = 8,
+  growing = False,
+  startSettings = StartSettings {
+    appleCount = 4,
+    startLength = 8,
+    boardSize = 5
+  }
 }

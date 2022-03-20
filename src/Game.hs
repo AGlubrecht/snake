@@ -15,14 +15,7 @@ import Data.Foldable     ( Foldable(toList) )
 import Data.List         ( nub )
 
 import Types
-    ( CellState(Clear, Snek, Wall, Appel, SnakeHead),
-      ArrBoard,
-      Board,
-      Position(..),
-      Game(..),
-      Player(Player, status, score, snake, direction, age),
-      Policy,
-      Status(Alive, Dead) )
+
 
 import Util    ( asserting )
 import Random  ( getRandomR, Contingent )
@@ -32,8 +25,10 @@ import Lattice ( getRandomCoords, up, addP, toAbs, fromArr, toArr, toPick, toEnv
 
 {- INITIALIZATION -}
 
-createGame :: Int -> Int -> Int -> [Policy] -> Contingent Game
-createGame appleCount startLength boardSize policies = do
+createGame :: GameSettings -> [Policy] -> Contingent Game
+createGame (GameSettings 
+              fitnessPressure grwoing gameLength
+              (StartSettings appleCount startLength boardSize)) policies = do
 
   coords <- nub <$> getRandomCoords boardSize 
             `asserting` [(2*boardSize)^2 > appleCount + length policies]  

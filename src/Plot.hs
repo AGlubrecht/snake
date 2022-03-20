@@ -25,6 +25,7 @@ import qualified Graphics.Gloss.Interface.IO.Interact as Gloss
 import Control.Concurrent ( MVar, ThreadId, modifyMVar_, swapMVar, forkIO, newMVar )
 
 import Util ( len )
+import Types
 
 {- PLOTTING -}
 
@@ -110,19 +111,31 @@ updateList channel list = (list ++) <$> swapMVar channel []
 data Configs = Configs {
   strength :: Int,
   mRates    :: [Float],
-  gameLength :: Int,
   snakesPerGame :: Int,
-  boardSize :: Int,
-  fitnessPressure :: Float,
-  appleCount :: Int,
-  startLength :: Int,
-  growing :: Bool
+  gameSettings :: GameSettings
 } deriving (Show, Read)
+
+defaultConfigs :: Configs
+defaultConfigs = Configs {
+  strength = 3,
+  mRates = [0.5, 0.03, 1],
+  snakesPerGame = 1,
+  gameSettings = GameSettings {
+    fitnessPressure = 4,
+    growing = False,
+    gameLength = 100,
+    startSettings = StartSettings {
+      appleCount = 4,
+      startLength = 4,
+      boardSize = 5
+    }
+  }
+}
 
 
 confWidget :: MVar Configs -> Widget Configs
 confWidget confVar = Widget
-  (Configs 0 [1, 2, 3, 4, 5] 0 0 4 0 1 3 True)
+  defaultConfigs
   return
   (const $ Pictures [])
   (\case

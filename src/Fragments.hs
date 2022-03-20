@@ -1,5 +1,17 @@
 module Fragments where
 
+{-r2 :: IO ()
+r2 = runEvolution
+    ({-randomDNN-}return $ zeroDNN reLU [cdim*2{-}, cdim + cdim `div` 2-}, cdim]) --initGenom
+    (evoStep . mutate) --evoStep
+    ((fromPureP . strictPhaseify) ..< runCA) --phenotype
+    (flip createGame 1) ---
+    (\gameLength -> map (fromIntegral . score) . players . flip (!!) gameLength . iterate gameStep)
+    (`gameToWidget` screenRadius)
+    dnnInfo
+    7  --core_count 
+    40--15 --games_per_core-}
+
 {-
 
 livingPlayers :: Game -> [Player]
