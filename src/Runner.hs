@@ -119,7 +119,7 @@ exampleGame = toIO $ createGame
                 (GameSettings
                   (StartSettings 1 10 10)
                   (IterationSettings 0 True 20))
-                [(toTotP.fromPureP) restrictedTailFinder] 
+                [(toTotP.fromPureP) tailFinder] 
 
 
 

@@ -6,7 +6,7 @@ import Data.List     ( nub )
 
 
 import Types
-    ( CellState(Snek, Clear, Appel, Wall),
+    ( CellState(Snek, Clear, Appel, Wall, SnakeHead),
       ArrBoard,
       Board,
       Position(..),
@@ -151,7 +151,8 @@ isAppel :: CellState -> Bool
 isAppel (Appel _) = True 
 isAppel _         = False
 
-ttl :: CellState -> Float
+ttl :: CellState -> Int
 ttl Wall       = infty
-ttl (Snek _ n) = fromIntegral n
+ttl (SnakeHead _ n) = n + 1
+ttl (Snek _ n) = n + 1
 ttl _          = 0

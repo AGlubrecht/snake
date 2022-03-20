@@ -31,7 +31,7 @@ getPaths board initialPosition targetTests = evalState
     (array (boundsOf searchRange) [(x:|:y, Nothing) | x <- [-searchRange.. searchRange-1],
                                                        y <- [-searchRange.. searchRange-1]])
     (toArr searchRange board) 
-    0
+    1 --unsafety
     (map (const Nothing) targetTests)
   )
 
@@ -47,10 +47,7 @@ multiBFS initialPos targetTests = do
   if null searchList || (Nothing `notElem` targets) 
     then return (map generatePathTo targets)
     else do
-        let isFree pos = case fromArr arrBoard pos of
-              Snek _ n -> n < pathLength
-              Wall       -> False
-              _          -> True
+        let isFree pos = if pos == (0 :|: 0) then False else ttl (fromArr arrBoard pos) <= pathLength
 
             childrens = map (filter isFree . neumannNeighborhood) searchList
 
@@ -82,7 +79,7 @@ data SearchState2 = SearchState2
     pathLength2 :: Int
   }
 
-getPath :: Board -> Position -> Position -> [Position]
+{-getPath :: Board -> Position -> Position -> [Position]
 getPath board initialPosition targetPosition = evalState
   (latticeBFS initialPosition targetPosition)
   (SearchState2 
@@ -101,10 +98,7 @@ latticeBFS initialPos targetPos = do
     else do
       if parentOf!targetPos == Nothing 
       then do
-        let isFree pos = case fromArr arrBoard pos of
-              Snek _ n -> n < pathLength
-              Wall       -> False
-              _          -> True
+        let isFree pos = ttl (fromArr arrBoard pos) < pathLength
 
             parents = Set.elems searchSet
 
@@ -125,7 +119,7 @@ latticeBFS initialPos targetPos = do
         let pathFrom pos = case parentOf!pos of
               Nothing       -> []
               Just prevPos -> pos:pathFrom prevPos 
-        return (reverse $ pathFrom targetPos)
+        return (reverse $ pathFrom targetPos)-}
 
 {-getShortestPath :: Board -> Position -> Position -> [Position]
 getShortestPath board initialPosition targetPosition = evalState

@@ -79,7 +79,7 @@ emptyGame = Game
 {- ITERATION -}
 
 gameStep :: Game -> Game
-gameStep g = decrementGameLength(if clearcount g == 0 then g else foldl moveHead (g {players = []}) (players g)) -- reconstruct players
+gameStep g = decrementGameLength(if gameOver g then g else foldl moveHead (g {players = []}) (players g)) -- reconstruct players
 
 decrementGameLength :: Game -> Game 
 decrementGameLength g = g {settings = (settings g) {gameLength = gameLength (settings g) - 1}}
@@ -104,7 +104,7 @@ moveHead g@(Game arrBoard players apples rGen rPicks clearcount settings)
           (snakeHead', direction') = apply p g rPick snakeHead direction policy
           rCoord:rCoords = clearCoords arrBoard rGen
           rPick:rPicks' = rPicks
-          snakeTailAssocs = (snakeEnd, Clear) : zip (toList  snakeInits) (map (Snek _id) [1..])
+          snakeTailAssocs = (snakeEnd, Clear) : zip (toList snakeInits) (map (Snek _id) [1..])
 
           decay = g{ 
             players = p{ status = Dead, snake = snakeInits }:players, 

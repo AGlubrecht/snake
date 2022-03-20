@@ -12,6 +12,7 @@ import Lattice
 import NeuralNet
 
 import Util
+import Debug.Trace
 
 
 phaseify :: PurePolicy -> PurePolicy
@@ -119,7 +120,7 @@ restrictedTailFinder env = fst (argmin snd [(action, getPositionValue (relDir ac
                        | otherwise        = -(1/ len pathToAppel)
     where
     [pathToAppel, pathToTail] = getPaths (quickNext env) pos [const isAppel, isSafeTail]
-    score = (round.ttl.env) (0 :|: 0)
+    score = (ttl.env) (0 :|: 0)
     
     isSafeTail stepsPassed (Snek _ n) = stepsPassed > n
     isSafeTail _           _          = False
@@ -127,6 +128,34 @@ restrictedTailFinder env = fst (argmin snd [(action, getPositionValue (relDir ac
     entireTailLength = fromMaybe 0 (tailLength env (0 :|: 0))
     
     tailLengthLag = score - entireTailLength
+
+tailFinder :: PurePolicy
+tailFinder env = fst (argmin snd (traceShowId [(action, getPositionValue (relDir action)) | action <- actions]))
+  where
+  distToTop   = fromMaybe (error "unbound grid") $ elemIndex Wall (map (\y -> env (0 :|: y)) [1..])
+  distToRight = fromMaybe (error "unbound grid") $ elemIndex Wall (map (\x -> env (x :|: 0)) [1..])
+  phase = if even (distToRight+distToTop)
+    then L
+    else R
+
+  getPositionValue pos | (not.isFree.env) pos = infty+1 -- There's something happening here, but I don't know what it is :(      
+                       | null pathToTail  = trace ":) " infty --apparently, trace doesn't work right in local functions. This is the best option often, which doesn't mak any sense
+                       | isAppel (env pos) = 0
+                       | null pathToAppel = (infty / 2) - len pathToTail
+                       | otherwise        = len pathToAppel
+    where
+    [pathToAppel, pathToTail] = getPaths (quickNext env) pos [const isAppel, isSafeTail]
+    score = (ttl.env) (0 :|: 0)
+    
+    isSafeTail stepsPassed (Snek _ n) = True--stepsPassed > n + 1 --safety margin
+    isSafeTail _           _          = False
+
+    entireTailLength = fromMaybe 0 (tailLength env (0 :|: 0))
+    
+    tailLengthLag = score - entireTailLength
+
+
+
 
 
 tailLength :: Board -> Position -> Maybe Int --untested

@@ -5,8 +5,8 @@ import Data.List ( findIndices, maximumBy )
 
 {- ARITHMETIC -}
 
-infty :: Float
-infty = 10000000000
+infty :: Num a => a
+infty = 1000000
 
 fat1 :: Num p => Bool -> p
 fat1 True  = 1

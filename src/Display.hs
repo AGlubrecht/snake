@@ -9,7 +9,7 @@ import qualified Data.Sequence as Seq
 import Control.Monad      ( forever )
 import Data.Foldable      ( Foldable(toList) )
 import Data.Array         ( (!), assocs, bounds )
-import Control.Concurrent ( MVar, swapMVar, forkIO, newMVar, readMVar )
+import Control.Concurrent ( MVar, swapMVar, forkIO, newMVar, readMVar, threadDelay )
 
 import Graphics.Gloss.Interface.IO.Interact
 import Graphics.Gloss.Interface.IO.Game
@@ -42,6 +42,7 @@ bufferedAnimation contingentGame = do
     computeFrames frameVar = forever $ do
       --putStrLn "computing frames..." 
       frame <- readMVar frameVar
+      threadDelay 10000
       let frame' = gameStep frame
       swapMVar frameVar (seq (ttl (arrBoard frame' ! (0 :|: 0))) frame')
 

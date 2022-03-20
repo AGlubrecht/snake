@@ -7,28 +7,7 @@ monadicFinder env = safeAction env (maybe (avoider env) goTowards nextPathPos)
       pos <- findClosest Appel env
       safeHead (getPath env (0, 0) pos)-}
 
-{-tailFinder :: PurePolicy
-tailFinder env = fst (argmin snd [(action, getPositionValue (relDir action)) | action <- actions])
-  where
-  getPositionValue pos | (not.isFree.env) pos = infty      
-                       | null pathToTail  = 10000 --there are not enough numbers to embedd better orderings
-                       | length pathToTail < tailLengthLag = 10000 - (fromIntegral.length) pathToTail
-                       | env pos == Appel = -infty
-                       | null pathToAppel = 1/(fromIntegral.length) pathToTail
-                       | otherwise        = -(1/ (fromIntegral.length) pathToAppel)
-    where
-    [pathToAppel, pathToTail] = getPaths (quickNext env) pos [const (Appel ==), isSafeTail]
-    score = (round.ttl.env) (0, 0)
-    
-    isSafeTail stepsPassed (Snek _ n) = stepsPassed > n+1
-    isSafeTail _           _          = False
-
-    entireTailLength = fromMaybe 0 (tailLength env (0, 0))
-    
-    tailLengthLag = score - entireTailLength
-
-    --isSafeTail' stepsPassed (Snek _ n) = stepsPassed > n+tailLengthLag +1 --tailLengthLag actually depends on part of tail
-    --isSafeTail' _           _          = False
+{-
 
 
 
