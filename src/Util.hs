@@ -5,8 +5,8 @@ import Data.List ( findIndices, maximumBy )
 
 {- ARITHMETIC -}
 
-infty :: Double
-infty = 1/0
+infty :: Float
+infty = 10000000000
 
 fat1 :: Num p => Bool -> p
 fat1 True  = 1
@@ -14,6 +14,7 @@ fat1 False = 0
 
 argMax :: Ord b => (a -> b) -> [a] -> a
 argMax = maximumBy . (compare `on`)
+
 
 mean :: (Fractional a, Foldable t) => t a -> a
 mean nums = sum nums / fromIntegral (length nums)

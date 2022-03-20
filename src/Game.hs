@@ -19,7 +19,7 @@ import Data.List         ( nub )
 import Types
 
 
-import Util    ( asserting )
+import Util 
 import Random  ( getRandomR, Contingent )
 import Lattice ( getRandomCoords, up, addP, toAbs, fromArr, toArr, toPick, toEnv )
 
@@ -27,13 +27,14 @@ import Lattice ( getRandomCoords, up, addP, toAbs, fromArr, toArr, toPick, toEnv
 
 {- INITIALIZATION -}
 
-createGame :: GameSettings -> [Policy] -> Contingent Game
-createGame (GameSettings 
-              settings
-              (StartSettings appleCount startLength boardSize)) policies = do
+createGame :: GameSettings -> [TotPolicy] -> Contingent Game
+createGame (GameSettings
+              (StartSettings appleCount startLength boardSize) 
+              settings) policies = do
 
   coords <- nub <$> getRandomCoords boardSize 
-            `asserting` [(2*boardSize)^2 > appleCount + length policies]  
+            `asserting` [(2*boardSize)^2 > appleCount + length policies]
+
   let (apples, coords') = splitAt appleCount coords
   let heads             = take (length policies) coords'
   let startBoard = startB boardSize apples heads startLength
@@ -100,7 +101,7 @@ moveHead g@(Game arrBoard players apples rGen rPicks clearcount settings)
           _             -> survive
         where
           snakeHead :<| _ = _snake
-          (snakeHead', direction') = apply (fromArr arrBoard) rPick snakeHead direction policy
+          (snakeHead', direction') = apply p g rPick snakeHead direction policy
           rCoord:rCoords = clearCoords arrBoard rGen
           rPick:rPicks' = rPicks
           snakeTailAssocs = (snakeEnd, Clear) : zip (toList  snakeInits) (map (Snek _id) [1..])
@@ -145,12 +146,16 @@ moveHead g@(Game arrBoard players apples rGen rPicks clearcount settings)
               }
 
 
-apply :: Board -> Float -> Position -> Position -> Policy -> (Position, Position)
-apply board picker pos direction policy = (pos', direction')
+apply :: Player -> Game -> Float -> Position -> Position -> TotPolicy -> (Position, Position)
+apply player game picker pos direction policy = (pos', direction')
   where
-    envBoard = board . toEnv pos direction
-    direction' = (toAbs direction . toPick picker . policy) envBoard
+    direction' = (toAbs direction . toPick picker ..< policy) player game
     pos' = addP pos direction'
+
+toTotP :: Policy -> TotPolicy
+toTotP policy player game = policy (fromArr (arrBoard game) . toEnv pos (direction player))
+  where
+    (pos :<| _) = snake player
 
 
 clearCoords :: ArrBoard -> [Position] -> [Position] --deletes all *leading* occupied positions from the list

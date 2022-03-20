@@ -11,12 +11,13 @@ import System.Random
 import qualified Data.Sequence as S
 import Runner
 
+
 main :: IO ()
-main = r1 --unner --animateGame testGame
+main = bufferedAnimation exampleGame--r1 --unner --animateGame testGame
 
 {-testGame :: Game
 testGame = Game
-  (toArr evRange (\pos -> if pos == (0, 0) then Appel else Clear))
+  (toArr evRange (\pos -> if pos == (0 :|: 0) then Appel else Clear))
   [
     --Player 1 3 (fromPureP monadicFinder) up up 0 0,
     --Player green  3 (fromPureP restrictedTailFinder) left right,

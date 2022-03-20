@@ -31,6 +31,49 @@ import Game    ( emptyGame, gameStep )
 import Plot    ( Widget(Widget) )
 
 
+bufferedAnimation :: IO Game -> IO ()
+bufferedAnimation contingentGame = do
+  initialGame <- contingentGame
+  frameVar <- newMVar initialGame
+
+  workerThread <- forkIO (computeFrames frameVar)
+  animateFrames frameVar
+  where 
+    computeFrames frameVar = forever $ do
+      --putStrLn "computing frames..." 
+      frame <- readMVar frameVar
+      let frame' = gameStep frame
+      swapMVar frameVar (seq (ttl (arrBoard frame' ! (0 :|: 0))) frame')
+
+animateFrames :: MVar Game -> IO ()
+animateFrames frameVar = playIO
+  windowDisplay
+  white
+  frameRate
+  initialModel
+  drawingFunc
+  inputHandler
+  updateFunc
+  where
+    initialModel :: MVar Game
+    initialModel = frameVar
+
+    drawingFunc :: MVar Game -> IO Picture
+    drawingFunc frameVar = do
+      frame <- readMVar frameVar
+      --putMVar frameVar frame
+      --(return . drawArrBoard . arrBoard) frame
+      return (scale 400 400 (drawGame frame))
+
+    inputHandler :: Event -> MVar Game -> IO (MVar Game)
+    inputHandler _ = return
+
+    updateFunc ::  Float -> MVar Game -> IO (MVar Game)
+    updateFunc _ = return
+
+    windowDisplay :: Display
+    windowDisplay = InWindow "Window" (1000, 1000) (10, 10)
+
 
 {- GAME -}
 

@@ -151,7 +151,7 @@ isAppel :: CellState -> Bool
 isAppel (Appel _) = True 
 isAppel _         = False
 
-ttl :: CellState -> Double
+ttl :: CellState -> Float
 ttl Wall       = infty
 ttl (Snek _ n) = fromIntegral n
 ttl _          = 0

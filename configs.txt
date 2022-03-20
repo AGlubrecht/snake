@@ -4,14 +4,14 @@ Configs {
   snakesPerGame = 1,
   gameSettings = GameSettings {
     iterationSettings = IterationSettings {
-      fitnessPressure = 36,
+      fitnessPressure = 3,
       growing = True,
-      gameLength = 1800
+      gameLength = 100
     },
     startSettings = StartSettings {
       appleCount = 1,
-      startLength = 3,
-      boardSize = 5
+      startLength = 5,
+      boardSize = 4
     }
   }
 }

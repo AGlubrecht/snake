@@ -33,7 +33,7 @@ r1 :: IO ()
 r1 = runEvolution
     (return $ zeroDNN reLU [dimension (surrounding 3 (const Clear)), 3, dimension L])
     (evoStep . mutate)
-    (const $ fromPureP . phaseify . perceiver (surrounding 3))
+    (const $ toTotP . fromPureP . phaseify . perceiver (surrounding 3))
     (createGame)
     (scoreGame)
     (`gameToWidget` screenRadius)
@@ -62,7 +62,7 @@ runEvolution
   batchSize <- (core_count * games_per_core *) . snakesPerGame <$> readMVar configVar 
   startGenoms <- toIO $ replicateM batchSize randomGenom
   
-  gameVar <- newMVar =<< toIO (gameFromGenoms (GameSettings (IterationSettings 0 False 100) (StartSettings 1 3 4)) 2 startGenoms)
+  gameVar <- newMVar =<< toIO (gameFromGenoms (GameSettings (StartSettings 1 3 4) (IterationSettings 0 False 100)) 2 startGenoms)
   scoreLog <- new
   --ageLog <- new
   guiFromWidget (translate 300 0 (gameToWidget gameVar) 
@@ -110,7 +110,17 @@ dnnElCrossover (DNN f a, DNN _ b) = DNN f <$> mapM (mapM pickFromPair) (zipWith 
 dnnMeanCrossover :: (DNN, DNN) -> Contingent DNN
 dnnMeanCrossover (DNN f a, DNN _ b) = DNN f <$> bernoulliPick 
                                         0.9 (a, map (fmap pairMean) 
-                                                (zipWith zipMatrices a b)) 
+                                                (zipWith zipMatrices a b))
+
+{- EXAMPLE -}
+
+exampleGame :: IO Game
+exampleGame = toIO $ createGame 
+                (GameSettings
+                  (StartSettings 1 10 10)
+                  (IterationSettings 0 True 20))
+                [(toTotP.fromPureP) restrictedTailFinder] 
+
 
 
 

@@ -5,6 +5,7 @@ module Notes where
 --            b5: Median 44
 
 --Improvements:
+  --streamline argmin and argmax 
   --append the other way around in updateList
   --clean up game engine and add growth-function :: Score -> Length
   --incorporate phases into ca model somehow

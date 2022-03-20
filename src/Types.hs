@@ -23,6 +23,7 @@ type Rule      = Board -> Board
 type Combinator a = a -> a -> a
 
 type TotRule   = CellState -> Int -> CellState
+type TotPolicy = Player -> Game -> Action -> Float
 type Policy    = Board -> Action -> Float
 type PurePolicy = Board -> Action
 type ActionPicker = (Action -> Float) -> Action
@@ -53,14 +54,14 @@ data StartSettings = StartSettings {
 } deriving(Show, Read)
 
 data GameSettings = GameSettings {
-  iterationSettings :: IterationSettings,
-  startSettings :: StartSettings
+  startSettings :: StartSettings,
+  iterationSettings :: IterationSettings
 } deriving (Show, Read)
 
 data Player = Player {
   _id  :: Int,
   score :: Int,
-  policy :: Policy,
+  policy :: TotPolicy,
   snake :: Seq Position,
   direction :: Position,
   status :: Status,
