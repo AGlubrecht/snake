@@ -2,8 +2,6 @@
 
 module Display where
 
---Improvements:
---append the other way around in updateList
 
 import qualified Data.Vector   as Vec
 import qualified Data.Sequence as Seq

@@ -28,4 +28,6 @@ module Notes where
 {- 
 Mit entsprechendem Training findet der Perceiver auf Karten mit n <=5 zuverlässig einen Hamiltonkreis
 Z.b. mit Rate [0.5, 0.01, 1] und einer dreiknotigen Zwischenebene
+
+Es lohnt sich auf Bordgröße 2 anzufangen, um die Phase rictig zu setzen
 -}

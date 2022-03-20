@@ -8,6 +8,8 @@ import Prelude hiding (reverse, replicate)
 
 import qualified Data.Vector as Vec
 
+import Debug.Trace
+
 import System.Random     ( RandomGen(split) )
 import Data.Array        ( Array, (!), (//), array, bounds )
 import Data.Sequence     ( (<|), replicate, Seq((:<|), Empty, (:|>)) )
@@ -27,7 +29,7 @@ import Lattice ( getRandomCoords, up, addP, toAbs, fromArr, toArr, toPick, toEnv
 
 createGame :: GameSettings -> [Policy] -> Contingent Game
 createGame (GameSettings 
-              fitnessPressure grwoing gameLength
+              settings
               (StartSettings appleCount startLength boardSize)) policies = do
 
   coords <- nub <$> getRandomCoords boardSize 
@@ -49,7 +51,8 @@ createGame (GameSettings
     (Vec.fromList apples) 
     appleCoords
     actionPickers
-    ((2*(boardSize-1))^2 - appleCount - (length policies * startLength)) --don't touch lol
+    ((2*(boardSize))^2 - appleCount - (length policies * startLength)) --don't touch lol
+    settings
 
 
 
@@ -69,63 +72,78 @@ emptyGame = Game
   []
   []
   0
+  (IterationSettings 0 False 0)
 
 
 {- ITERATION -}
 
 gameStep :: Game -> Game
-gameStep g = if clearcount g == 0 then g else foldl moveHead (g {players = []}) (players g) -- reconstruct players 
+gameStep g = decrementGameLength(if clearcount g == 0 then g else foldl moveHead (g {players = []}) (players g)) -- reconstruct players
+
+decrementGameLength :: Game -> Game 
+decrementGameLength g = g {settings = (settings g) {gameLength = gameLength (settings g) - 1}}
 
 moveHead :: Game -> Player -> Game
-moveHead g@(Game arrBoard players apples rGen rPicks clearcount)
+moveHead g@(Game arrBoard players apples rGen rPicks clearcount settings)
          p@(Player _id score policy _snake direction status age) =
   if clearcount == 0 then    g { players = p:players }
   else case _snake of
     Empty                 -> g { players = p:players }
     snakeInits :|> snakeEnd -> 
       case status of 
-        Dead ->            die
+        Dead ->            decay
         Alive -> case fromArr arrBoard snakeHead' of
-          Snek      _ _ -> die
-          SnakeHead _ _ -> die
-          Wall          -> die
-          Appel i->
-            let player' = p{
-              score = score+1,
-              age = age+1,
-              snake = snakeHead' <| _snake,
-              direction = direction'} 
-            in g{
-              players = player':players,
-              apples = apples Vec.// [(i, rCoord)], 
-              arrBoard = arrBoard // [(snakeHead', SnakeHead _id score), (rCoord, Appel i)],
-              rPositions = rCoords,
-              rPicks = rPicks',
-              clearcount = clearcount-1
-            }
-
-          _ -> g{
-            players = p{
-              snake = snakeHead' <| snakeInits,
-              direction = direction',
-              age = age+1
-            }:players,
-            rPicks = rPicks',
-            arrBoard = arrBoard // ((snakeHead', SnakeHead _id score)
-                                   :(snakeEnd, Clear)
-                                   : snakeTailAssocs)
-          }
+          Snek      _ _ -> decay
+          SnakeHead _ _ -> decay
+          Wall          -> decay
+          Appel i       -> eat i
+          _             -> survive
         where
           snakeHead :<| _ = _snake
           (snakeHead', direction') = apply (fromArr arrBoard) rPick snakeHead direction policy
           rCoord:rCoords = clearCoords arrBoard rGen
           rPick:rPicks' = rPicks
           snakeTailAssocs = (snakeEnd, Clear) : zip (toList  snakeInits) (map (Snek _id) [1..])
-          die = g{ 
+
+          decay = g{ 
             players = p{ status = Dead, snake = snakeInits }:players, 
             arrBoard = arrBoard // snakeTailAssocs,
             clearcount = clearcount+1
           }
+
+          survive = g{
+              players = p{
+                snake = snakeHead' <| snakeInits,
+                direction = direction',
+                age = age+1
+              }:players,
+              rPicks = rPicks',
+              arrBoard = arrBoard // ((snakeHead', SnakeHead _id score)
+                                    :(snakeEnd, Clear)
+                                    : snakeTailAssocs)
+            }
+
+          eat i = 
+            let
+              (persistingSnake, clearcount' , boardSnake                           ) = if growing settings then 
+                (_snake,        clearcount-1, []                                 )   else
+                (snakeInits,    clearcount  , (snakeEnd, Clear) : snakeTailAssocs)  
+            in 
+              g{
+                players = p{
+                  score = score+1,
+                  age = age+1,
+                  snake = snakeHead' <| persistingSnake,
+                  direction = direction'
+                }:players,
+
+                apples = apples Vec.// [(i, rCoord)], 
+                arrBoard = arrBoard // ((snakeHead', SnakeHead _id score):(rCoord, Appel i):boardSnake),
+                rPositions = rCoords,
+                rPicks = rPicks',
+                clearcount = clearcount'
+              }
+
 
 apply :: Board -> Float -> Position -> Position -> Policy -> (Position, Position)
 apply board picker pos direction policy = (pos', direction')
@@ -139,3 +157,16 @@ clearCoords :: ArrBoard -> [Position] -> [Position] --deletes all *leading* occu
 clearCoords arrBoard (pos:poss) | arrBoard!pos == Clear = pos:poss
                                 | otherwise             = clearCoords arrBoard poss
 clearCoords _ [] = undefined
+
+
+{- SCORING -}
+
+scoreGame :: Game -> [Float]
+scoreGame g = if   gameOver g 
+              then map ((+ (-fitnessPressure (settings g))) . fromIntegral.  score) (players g)
+              else scoreGame (gameStep g)
+
+gameOver :: Game -> Bool
+gameOver g = (not . (Alive `elem`) . map status .players) g
+          || gameLength (settings g) == 0
+          || ((clearcount g)) == 0

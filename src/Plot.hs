@@ -121,9 +121,11 @@ defaultConfigs = Configs {
   mRates = [0.5, 0.03, 1],
   snakesPerGame = 1,
   gameSettings = GameSettings {
-    fitnessPressure = 4,
-    growing = False,
-    gameLength = 100,
+    iterationSettings = IterationSettings {
+      fitnessPressure = 4,
+      growing = False,
+      gameLength = 100
+    },
     startSettings = StartSettings {
       appleCount = 4,
       startLength = 4,
@@ -131,6 +133,7 @@ defaultConfigs = Configs {
     }
   }
 }
+
 
 
 confWidget :: MVar Configs -> Widget Configs

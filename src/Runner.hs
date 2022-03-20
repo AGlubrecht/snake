@@ -35,7 +35,7 @@ r1 = runEvolution
     (evoStep . mutate)
     (const $ fromPureP . phaseify . perceiver (surrounding 3))
     (createGame)
-    ((\gameLength -> map (fromIntegral . score) . players . flip (!!) gameLength . iterate gameStep) (100))
+    (scoreGame)
     (`gameToWidget` screenRadius)
     dnnInfo
     7
@@ -62,7 +62,7 @@ runEvolution
   batchSize <- (core_count * games_per_core *) . snakesPerGame <$> readMVar configVar 
   startGenoms <- toIO $ replicateM batchSize randomGenom
   
-  gameVar <- newMVar =<< toIO (gameFromGenoms (GameSettings 0 False 100 (StartSettings 1 3 4)) 2 startGenoms)
+  gameVar <- newMVar =<< toIO (gameFromGenoms (GameSettings (IterationSettings 0 False 100) (StartSettings 1 3 4)) 2 startGenoms)
   scoreLog <- new
   --ageLog <- new
   guiFromWidget (translate 300 0 (gameToWidget gameVar) 

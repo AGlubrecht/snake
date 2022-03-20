@@ -12,7 +12,7 @@ type ArrBoard  = Array Position CellState
 type ArrRule   = ArrBoard -> ArrBoard
 
 infix 3 :|:
-data Position  = Int :|: Int deriving (Eq, Ord)
+data Position  = Int :|: Int deriving (Eq, Ord, Show)
 
 data CellState = Snek Int Int | SnakeHead Int Int | Clear | Appel Int | Wall deriving (Eq, Show)
 data Action    = L | R | F deriving (Eq, Show)
@@ -36,8 +36,15 @@ data Game = Game {
   apples :: V.Vector Position,
   rPositions :: [Position],
   rPicks :: [Float],
-  clearcount :: Int
+  clearcount :: Int,
+  settings :: IterationSettings
 }
+
+data IterationSettings = IterationSettings {
+  fitnessPressure :: Float,
+  growing :: Bool,
+  gameLength :: Int
+} deriving (Show, Read)
 
 data StartSettings = StartSettings {
   appleCount :: Int,
@@ -46,9 +53,7 @@ data StartSettings = StartSettings {
 } deriving(Show, Read)
 
 data GameSettings = GameSettings {
-  fitnessPressure :: Float,
-  growing :: Bool,
-  gameLength :: Int,
+  iterationSettings :: IterationSettings,
   startSettings :: StartSettings
 } deriving (Show, Read)
 
