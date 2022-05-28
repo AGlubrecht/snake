@@ -1,6 +1,24 @@
 module Fragments where
 
-{-monadicFinder :: PurePolicy
+{-
+
+goTowards :: Position -> Action
+goTowards (x :|: y)
+  | y > abs x = F
+  | x > 0 = R
+  | otherwise = L
+
+avoider :: PurePolicy
+avoider env | env up    == Clear = F
+  | env left  == Clear = L
+  | env right == Clear = R
+avoider _ = F
+
+findClosest :: CellState -> Board -> Maybe Position
+findClosest cstate board = find ((cstate ==). board) (spiral (2*searchRange))
+
+
+monadicFinder :: PurePolicy
 monadicFinder env = safeAction env (maybe (avoider env) goTowards nextPathPos)
   where 
     nextPathPos = do --itsa monad

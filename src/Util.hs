@@ -1,6 +1,6 @@
 module Util where
 
-import Data.List ( findIndices, maximumBy )
+import Data.List ( findIndices, minimumBy, maximumBy )
 
 
 {- ARITHMETIC -}
@@ -14,6 +14,12 @@ fat1 False = 0
 
 argMax :: Ord b => (a -> b) -> [a] -> a
 argMax = maximumBy . (compare `on`)
+
+argmin :: (Foldable t, Ord a) => (b -> a) -> t b -> b
+argmin = minimumBy . (compare `on`)
+
+argmins :: Ord a1 => (a2 -> a1) -> [a2] -> [a2]
+argmins f as = filter ((==) `on`  f $ argmin f as) as 
 
 
 mean :: (Fractional a, Foldable t) => t a -> a

@@ -47,9 +47,9 @@ multiBFS initialPos targetTests = do
         Just prevPos -> pos:pathFrom prevPos
 
   if null searchList || (Nothing `notElem` targets) 
-    then return (map generatePathTo (targets))
+    then return (map generatePathTo targets)
     else do
-        let isFree pos = if pos == (0 :|: 0) then False else ttl (fromArr arrBoard pos) <= pathLength
+        let isFree pos = pos /= (0 :|: 0) && ttl (fromArr arrBoard pos) <= pathLength
 
             childrens = map (filter isFree . neumannNeighborhood) searchList
 

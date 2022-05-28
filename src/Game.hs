@@ -8,7 +8,6 @@ import Prelude hiding (reverse, replicate)
 
 import qualified Data.Vector as Vec
 
-import Debug.Trace
 
 import System.Random     ( RandomGen(split) )
 import Data.Array        ( Array, (!), (//), array, bounds )
@@ -87,9 +86,9 @@ decrementGameLength g = g {settings = (settings g) {gameLength = gameLength (set
 moveHead :: Game -> Player -> Game
 moveHead g@(Game arrBoard players apples rGen rPicks clearcount settings)
          p@(Player _id score policy _snake direction status age) =
-  if clearcount == 0 then    g { players = p:players }
+  if clearcount == 0 then  stagnate
   else case _snake of
-    Empty                 -> g { players = p:players }
+    Empty               -> stagnate
     snakeInits :|> snakeEnd -> 
       case status of 
         Dead ->            decay
@@ -100,17 +99,18 @@ moveHead g@(Game arrBoard players apples rGen rPicks clearcount settings)
           Appel i       -> eat i
           _             -> survive
         where
-          snakeHead :<| _ = _snake
+          snakeHead :<| _          = _snake
           (snakeHead', direction') = apply p g rPick snakeHead direction policy
-          rCoord:rCoords = clearCoords arrBoard rGen
-          rPick:rPicks' = rPicks
-          snakeTailAssocs = (snakeEnd, Clear) : zip (toList snakeInits) (map (Snek _id) ((score -) <$> [1..]))
+          rCoord:rCoords           = clearCoords arrBoard rGen
+          rPick:rPicks'            = rPicks
+          snakeTailAssocs          = (snakeEnd, Clear) 
+                                      : zip (toList snakeInits) (map (Snek _id) ((score -) <$> [1..]))
 
-          decay = g{ 
-            players = p{ status = Dead, snake = snakeInits }:players, 
-            arrBoard = arrBoard // snakeTailAssocs,
-            clearcount = clearcount+1
-          }
+          decay   = g{ 
+              players    = p{ status = Dead, snake = snakeInits }:players, 
+              arrBoard   = arrBoard // snakeTailAssocs,
+              clearcount = clearcount+1
+            }
 
           survive = g{
               players = p{
@@ -124,26 +124,27 @@ moveHead g@(Game arrBoard players apples rGen rPicks clearcount settings)
                                     : snakeTailAssocs)
             }
 
-          eat i = 
-            let
-              (persistingSnake, clearcount' , boardSnake                           ) = if growing settings then 
-                (_snake,        clearcount-1, []                                 )   else
-                (snakeInits,    clearcount  , (snakeEnd, Clear) : snakeTailAssocs)  
-            in 
-              g{
-                players = p{
-                  score = score+1,
-                  age = age+1,
-                  snake = snakeHead' <| persistingSnake,
-                  direction = direction'
-                }:players,
+          eat i   = g{
+              players = p{
+                score = score+1,
+                age = age+1,
+                snake = snakeHead' <| persistingSnake,
+                direction = direction'
+              }:players,
 
-                apples = apples Vec.// [(i, rCoord)], 
-                arrBoard = arrBoard // ((snakeHead', SnakeHead _id score):(rCoord, Appel i):boardSnake),
-                rPositions = rCoords,
-                rPicks = rPicks',
-                clearcount = clearcount'
-              }
+              apples = apples Vec.// [(i, rCoord)], 
+              arrBoard = arrBoard // ((snakeHead', SnakeHead _id score):(rCoord, Appel i):boardSnake),
+              rPositions = rCoords,
+              rPicks = rPicks',
+              clearcount = clearcount'
+            }
+            where
+              (  persistingSnake, clearcount' , boardSnake                         ) = if growing settings then 
+                (_snake,          clearcount-1, []                                 )   else
+                (snakeInits,      clearcount  , (snakeEnd, Clear) : snakeTailAssocs)  
+  where
+          stagnate = g { players = p:players }
+        
 
 
 apply :: Player -> Game -> Float -> Position -> Position -> TotPolicy -> (Position, Position)

@@ -5,7 +5,7 @@ module Notes where
 --            b5: Median 44
 
 --Improvements:
-  --streamline argmin and argmax 
+  --streamline argmin and argmax -DONE
   --append the other way around in updateList
   --clean up game engine and add growth-function :: Score -> Length
   --incorporate phases into ca model somehow
@@ -30,5 +30,5 @@ module Notes where
 Mit entsprechendem Training findet der Perceiver auf Karten mit n <=5 zuverlässig einen Hamiltonkreis
 Z.b. mit Rate [0.5, 0.01, 1] und einer dreiknotigen Zwischenebene
 
-Es lohnt sich auf Bordgröße 2 anzufangen, um die Phase rictig zu setzen
+Es lohnt sich auf Bordgröße 2 anzufangen, um die Phase richtig zu setzen
 -}

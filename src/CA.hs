@@ -1,7 +1,7 @@
 module CA where
 
 --Improvements:
---Remember the actual environmentin each convolution-step
+--Remember the actual environment in each convolution-step
 --Dont create a new grid-array in every CA-step
 
 

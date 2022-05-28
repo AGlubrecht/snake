@@ -155,6 +155,10 @@ isTail :: CellState -> Bool
 isTail (Snek _ _) = True 
 isTail _           = False
 
+isSnake :: CellState -> Bool
+isSnake (Snek _ _) = True
+isSnake _ = False
+
 ttl :: CellState -> Int
 ttl Wall       = infty
 ttl (SnakeHead _ n) = n

@@ -14,12 +14,12 @@ formatNum length num = showFFloat (Just length)  num ""
 
 dnnInfo :: [Float] -> [DNN] -> String 
 dnnInfo fitnesses dnns = 
-               " | Max Fitness: "    ++ (formatNum 0 . maximum)  fitnesses
-            ++ " | Mean Fitness: "   ++ (formatNum 2 . mean) fitnesses
-            ++ " | Median Fitness: " ++ (formatNum 1 . median) fitnesses
-            ++ " | Max Rate: "       ++ (formatNum 3 . maxRate) fitnesses
-            ++ " | Variance: "       ++ (formatNum 3 . dnnVariance) dnns
-            ++ " | Mean Weight: "    ++ (formatNum 3. mean) (meanWeight <$> dnns)
+               " | Max Fitness: "    ++ (formatNum 0 . maximum                ) fitnesses
+            ++ " | Mean Fitness: "   ++ (formatNum 2 . mean                   ) fitnesses
+            ++ " | Median Fitness: " ++ (formatNum 1 . median                 ) fitnesses
+            ++ " | Max Rate: "       ++ (formatNum 3 . maxRate                ) fitnesses
+            ++ " | Variance: "       ++ (formatNum 3 . dnnVariance            ) dnns
+            ++ " | Mean Weight: "    ++ (formatNum 3 . mean . (meanWeight <$>)) dnns
 
 dnnVariance :: [DNN] -> Float
 dnnVariance = variance . map unshape
@@ -42,9 +42,9 @@ median nums | null nums = 0
             | otherwise  = (upper + lower) / 2
   where
     sorted = sort nums
-    half = length sorted `div` 2
-    lower = sorted !! half
-    upper = reverse sorted !! half
+    half   = length sorted `div` 2
+    lower  = sorted !! half
+    upper  = reverse sorted !! half
 
 rate :: Eq a => a -> [a] -> Float 
 rate a as = len (filter (a==) as) / len as 
@@ -54,4 +54,4 @@ maxRate nums = rate (maximum nums) nums
 
   
 
---pca is the eigendecomposition of covariance-matrix
+--pca is eigendecomposition of covariance-matrix

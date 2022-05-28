@@ -4,6 +4,7 @@ import System.Random         ( StdGen, Random(randomR, random), newStdGen, rando
 import Control.Monad.State   ( MonadState(state), evalState, State )
 import System.Random.Shuffle ( shuffle' )
 
+
 {- FUNDAMENTALS -}
 
 type Contingent = State StdGen
@@ -29,7 +30,7 @@ getLifter = flip evalState <$> randomIO
 mapCP :: (a -> Contingent b) -> [a] -> Contingent [b]
 mapCP f as = cloneC $ f <$> as
 
---use the same seed for each item
+--uses the same seed for each item
 cloneC :: [Contingent a] -> Contingent [a]
 cloneC conVals = do 
   stdGen <- getRandom
