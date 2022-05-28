@@ -64,7 +64,7 @@ animateFrames frameVar = playIO
       frame <- readMVar frameVar
       --putMVar frameVar frame
       --(return . drawArrBoard . arrBoard) frame
-      return (scale 400 400 (drawGame frame))
+      return (scale 380 380 (drawGame frame))
 
     inputHandler :: Event -> MVar Game -> IO (MVar Game)
     inputHandler _ = return

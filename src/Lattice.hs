@@ -11,7 +11,7 @@ import Types
       Board,
       Position(..),
       Action(..),
-      ActionPicker )
+      ActionPicker, Player (_id) )
 
 import Util   ( infty, mapPair )
 import Random ( getRandomR, Contingent )
@@ -151,8 +151,12 @@ isAppel :: CellState -> Bool
 isAppel (Appel _) = True 
 isAppel _         = False
 
+isTail :: CellState -> Bool 
+isTail (Snek _ _) = True 
+isTail _           = False
+
 ttl :: CellState -> Int
 ttl Wall       = infty
-ttl (SnakeHead _ n) = n + 1
-ttl (Snek _ n) = n + 1
+ttl (SnakeHead _ n) = n
+ttl (Snek _ n) = n
 ttl _          = 0

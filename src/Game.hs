@@ -104,7 +104,7 @@ moveHead g@(Game arrBoard players apples rGen rPicks clearcount settings)
           (snakeHead', direction') = apply p g rPick snakeHead direction policy
           rCoord:rCoords = clearCoords arrBoard rGen
           rPick:rPicks' = rPicks
-          snakeTailAssocs = (snakeEnd, Clear) : zip (toList snakeInits) (map (Snek _id) [1..])
+          snakeTailAssocs = (snakeEnd, Clear) : zip (toList snakeInits) (map (Snek _id) ((score -) <$> [1..]))
 
           decay = g{ 
             players = p{ status = Dead, snake = snakeInits }:players, 

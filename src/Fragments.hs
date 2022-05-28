@@ -10,7 +10,83 @@ monadicFinder env = safeAction env (maybe (avoider env) goTowards nextPathPos)
 {-
 
 
+{-getPath :: Board -> Position -> Position -> [Position]
+getPath board initialPosition targetPosition = evalState
+  (latticeBFS initialPosition targetPosition)
+  (SearchState2 
+    (Set.singleton initialPosition) 
+    (array (boundsOf searchRange) [(x:|:y, Nothing) | x <- [-searchRange.. searchRange-1],
+                                                y <- [-searchRange.. searchRange-1]]) --why is emppty array so hard to make?
+    (toArr searchRange board) 
+    0
+  )
+--toArr
+latticeBFS :: Position -> Position -> State SearchState2 [Position]
+latticeBFS initialPos targetPos = do
+  SearchState2 searchSet parentOf arrBoard pathLength <- get
+  if Set.null searchSet
+    then return []
+    else do
+      if parentOf!targetPos == Nothing 
+      then do
+        let isFree pos = ttl (fromArr arrBoard pos) < pathLength
 
+            parents = Set.elems searchSet
+
+            childrens = map (filter isFree . neumannNeighborhood) parents
+
+            searchSet' = (Set.fromList . concat) childrens
+
+            parentOf' = parentOf // concat [zip children (repeat $ Just parent) 
+                    | (children, parent) <- zip childrens parents]
+            
+            arrBoard' = arrBoard // zip parents (repeat Wall) --should be Snek ? (score+pathlength) Wall, but sneks don't know their own score
+            
+            pathLength' = pathLength+1
+
+        put (SearchState2 searchSet' parentOf' arrBoard' pathLength')
+        latticeBFS initialPos targetPos
+      else do
+        let pathFrom pos = case parentOf!pos of
+              Nothing       -> []
+              Just prevPos -> pos:pathFrom prevPos 
+        return (reverse $ pathFrom targetPos)-}
+
+{-getShortestPath :: Board -> Position -> Position -> [Position]
+getShortestPath board initialPosition targetPosition = evalState
+  (bfs board initialPosition targetPosition)                                           --operation on state
+  (BFSState (Seq.singleton initialPosition) (Set.singleton initialPosition) Map.empty) --starting sate
+
+data BFSState = BFSState
+  { bfsSearchQueue :: Seq.Seq Position
+  , bfsVisistedPositions :: Set.Set Position
+  , bfsParents :: Map.Map Position Position
+  }
+
+bfs :: Board -> Position -> Position -> State BFSState [Position]
+bfs board initialPosition targetPosition = do
+  BFSState searchQueue visitedSet parentsMap <- get
+  if Seq.null searchQueue
+    then return [] --no path was found
+    else do
+      let nextLoc = Seq.index searchQueue 0
+      if nextLoc == targetPosition  --path found :)
+        then return (unwindPath parentsMap [targetPosition])
+        else do  --do a step of bfs
+          let adjacentCells = getAdjacentPositions board nextLoc
+              unvisitedNextCells = filter (\l -> not (Set.member l visitedSet)) adjacentCells
+              newSearchQueue = foldr (flip (Seq.|>)) (Seq.drop 1 searchQueue) unvisitedNextCells --mabe modify bfs here and remove set
+              newVisitedSet = Set.insert nextLoc visitedSet
+              newParentsMap = foldr (\l -> Map.insert l nextLoc) parentsMap unvisitedNextCells
+          put (BFSState newSearchQueue newVisitedSet newParentsMap)
+          bfs board initialPosition targetPosition
+  where
+    unwindPath parentsMap currentPath = case Map.lookup (head currentPath) parentsMap of
+      Nothing -> tail currentPath --reached beginning of path
+      Just parent -> unwindPath parentsMap (parent : currentPath)
+
+getAdjacentPositions :: Board -> Position -> [Position]
+getAdjacentPositions board position = filter (isFree . board) (neumannNeighbors position)-}
 
 
 randomer :: Policy
