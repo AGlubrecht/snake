@@ -59,17 +59,16 @@ data GameSettings = GameSettings {
 } deriving (Show, Read)
 
 data Player = Player {
-  _id  :: Int,
-  score :: Int,
-  policy :: TotPolicy,
-  snake :: Seq Position,
+  _id       :: Int,
+  score     :: Int,
+  policy    :: TotPolicy,
+  snake     :: Seq Position,
   direction :: Position,
-  status :: Status,
-  age :: Int
+  status    :: Status,
+  age       :: Int
 }
 
 data Optional a = Custom a | Default
 
 actions :: [Action]
 actions = [L, R, F]
-

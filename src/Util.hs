@@ -3,14 +3,11 @@ module Util where
 import Data.List ( findIndices, minimumBy, maximumBy )
 
 
-{- ARITHMETIC -}
+{- GENERAL -}
 
-infty :: Num a => a
-infty = 1000000
-
-fat1 :: Num p => Bool -> p
-fat1 True  = 1
-fat1 False = 0
+safeHead :: [a] -> Maybe a
+safeHead [] = Nothing
+safeHead (a:as) = Just a
 
 argMax :: Ord b => (a -> b) -> [a] -> a
 argMax = maximumBy . (compare `on`)
@@ -21,6 +18,15 @@ argmin = minimumBy . (compare `on`)
 argmins :: Ord a1 => (a2 -> a1) -> [a2] -> [a2]
 argmins f as = filter ((==) `on`  f $ argmin f as) as 
 
+
+{- ARITHMETIC -}
+
+infty :: Num a => a
+infty = 1000000
+
+fat1 :: Num p => Bool -> p
+fat1 True  = 1
+fat1 False = 0
 
 mean :: (Fractional a, Foldable t) => t a -> a
 mean nums = sum nums / fromIntegral (length nums)
@@ -58,8 +64,3 @@ asserting :: a -> [Bool] -> a
 asserting a bs = case findIndices not bs of
   [] -> a
   wrongs -> error $ "The following assertions were violated: " ++ show wrongs
-
-
-
-
-

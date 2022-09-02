@@ -15,7 +15,7 @@ module Notes where
   --seperate nn params from activationfunc which stays constant
   --solve almost-cycle
 
-  --show variance, change of population
+  --show variance, change of population -DONE
 
   --random snake starting directions
     --not yet an issue
