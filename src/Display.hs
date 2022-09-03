@@ -42,7 +42,7 @@ bufferedAnimation contingentGame = do
     computeFrames frameVar = forever $ do
       --putStrLn "computing frames..." 
       frame <- readMVar frameVar
-      threadDelay 10000
+      --threadDelay 100000
       let frame' = gameStep frame
       swapMVar frameVar (seq (ttl (arrBoard frame' ! (0 :|: 0))) frame')
 

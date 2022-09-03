@@ -152,6 +152,7 @@ apply player game picker pos direction policy = (pos', direction')
   where
     direction' = (toAbs direction . toPick picker ..< policy) player game
     pos' = addP pos direction'
+    
 
 toTotP :: Policy -> TotPolicy
 toTotP policy player game = policy (fromArr (arrBoard game) . toEnv pos (direction player))
