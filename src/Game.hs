@@ -11,9 +11,9 @@ import qualified Data.Vector as Vec
 
 import System.Random     ( RandomGen(split) )
 import Data.Array        ( Array, (!), (//), array, bounds )
-import Data.Sequence     ( (<|), replicate, Seq((:<|), Empty, (:|>)) )
+import Data.Sequence     ( (<|), replicate, reverse, Seq((:<|), Empty, (:|>)) )
 import Data.Foldable     ( Foldable(toList) )
-import Data.List         ( nub, reverse)
+import Data.List         ( nub)
 
 import Types
 
@@ -78,7 +78,7 @@ emptyGame = Game
 {- ITERATION -}
 
 gameStep :: Game -> Game
-gameStep g = decrementGameLength(if gameOver g then g else foldl moveHead (g {players = []}) (players g)) -- reconstruct players
+gameStep g = decrementGameLength (if gameOver g then g else foldl moveHead (g {players = []}) (players g)) -- reconstruct players
 
 decrementGameLength :: Game -> Game 
 decrementGameLength g = g {settings = (settings g) {gameLength = gameLength (settings g) - 1}}
@@ -101,10 +101,14 @@ moveHead g@(Game arrBoard players apples rGen rPicks clearcount settings)
         where
           snakeHead :<| _          = _snake
           (snakeHead', direction') = apply p g rPick snakeHead direction policy
-          rCoord:rCoords           = clearCoords arrBoard rGen
+
+          transientBoard pos | pos == snakeHead' = Wall
+                             | otherwise         = fromArr arrBoard pos
+
+          rCoord:rCoords           = clearCoords transientBoard rGen
           rPick:rPicks'            = rPicks
-          snakeTailAssocs          = reverse ((snakeEnd, Clear) 
-                                      : zip (toList snakeInits) (map (Snek _id) ((score -) <$> [1..])))
+          snakeTailAssocs          = (snakeEnd, Clear) 
+                                      : zip (toList (reverse snakeInits)) (Snek _id <$> [1..])
 
           decay   = g{ 
               players    = p{ status = Dead, snake = snakeInits }:players, 
@@ -160,9 +164,9 @@ toTotP policy player game = policy (fromArr (arrBoard game) . toEnv pos (directi
     (pos :<| _) = snake player
 
 
-clearCoords :: ArrBoard -> [Position] -> [Position] --deletes all *leading* occupied positions from the list
-clearCoords arrBoard (pos:poss) | arrBoard!pos == Clear = pos:poss
-                                | otherwise             = clearCoords arrBoard poss
+clearCoords :: Board -> [Position] -> [Position] --deletes all *leading* occupied positions from the list
+clearCoords board (pos:poss) | board pos == Clear = pos:poss
+                             | otherwise             = clearCoords board poss
 clearCoords _ [] = undefined
 
 

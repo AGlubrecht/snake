@@ -73,38 +73,16 @@ phase env = even (distToRight+distToTop)
 
 {- TAIL-FINDING -}
 
-{-restrictedTailFinder :: PurePolicy
-restrictedTailFinder env = fst (argmin snd [(action, getPositionValue (relDir action)) | action <- {-actions-} [F, phase]])
-  where
-  distToTop   = fromMaybe (error "unbound grid") $ elemIndex Wall (map (\y -> env (0 :|: y)) [1..])
-  distToRight = fromMaybe (error "unbound grid") $ elemIndex Wall (map (\x -> env (x :|: 0)) [1..])
-  phase = if even (distToRight+distToTop)
-    then L
-    else R
-
-  getPositionValue pos | (not.isFree.env) pos = infty      
-                       | otherwise        = -(1/ len pathToAppel)
-    where
-    [pathToAppel, pathToTail] = getPaths (quickNext env) pos [const isAppel, isSafeTail]
-    score = (ttl.env) (0 :|: 0)
-    
-    isSafeTail stepsPassed (Snek _ n) = stepsPassed > n
-    isSafeTail _           _          = False
-
-    entireTailLength = fromMaybe 0 (tailLength env (0 :|: 0))
-    
-    tailLengthLag = score - entireTailLength-}
-
 restrictedTailFinder :: PurePolicy
 restrictedTailFinder env = fst (traceShowId $ argmin snd ([(action, getPositionValue (relDir action)) | action <- [F, phase]]))
   where
   distToTop   = fromMaybe (error "unbound grid") $ elemIndex Wall (map (\y -> env (0 :|: y)) [1..])
   distToRight = fromMaybe (error "unbound grid") $ elemIndex Wall (map (\x -> env (x :|: 0)) [1..])
-  phase = if even distToTop-- +distToRight)
+  phase = if even distToTop
     then L
     else R
 
-  getPositionValue pos | (not.isFree.env) pos = infty+1
+  getPositionValue pos | (not.isFree.env) pos = infty
                        | null safePathToTail = infty - 1 - len pathToTail
                        | isAppel (env pos) = 0
                        | null pathToAppel = (infty / 2) - len pathToTail
@@ -116,8 +94,50 @@ restrictedTailFinder env = fst (traceShowId $ argmin snd ([(action, getPositionV
     isSafeTail stepsPassed (Snek _ n) = stepsPassed > n
     isSafeTail _           _          = False
 
+phasedAvoider :: PurePolicy
+phasedAvoider env = fst (traceShowId $ argmin snd ([(action, getPositionValue (relDir action)) | action <- [F, phase]]))
+  where
+  distToTop   = fromMaybe (error "unbound grid") $ elemIndex Wall (map (\y -> env (0 :|: y)) [1..])
+  distToRight = fromMaybe (error "unbound grid") $ elemIndex Wall (map (\x -> env (x :|: 0)) [1..])
+  phase = if even distToTop-- +distToRight)
+    then L
+    else R
+
+  getPositionValue pos | (not.isFree.env) pos = infty
+                       | null safePathToTail = infty - 1 - len pathToTail
+                       | isAppel (env pos) = - len pathToTail
+                       | null pathToAppel = (infty / 2) - len pathToTail
+                       | otherwise        = 0.1 * len pathToAppel - len pathToTail 
+    where
+    [pathToAppel, pathToTail, safePathToTail] = getPhasePaths (quickNext env) pos [const (isAppel .), const isTailEndAdjacent, \n -> (isSafeTail n .)]
+    score = (ttl.env) (0 :|: 0)
+
+    isSafeTail stepsPassed (Snek _ n) = stepsPassed > n
+    isSafeTail _           _          = False
+
 
 tailFinder :: PurePolicy
+tailFinder env = fst (traceShowId $ argmin snd ([(action, getPositionValue (relDir action)) | action <- actions]))
+  where
+  distToTop   = fromMaybe (error "unbound grid") $ elemIndex Wall (map (\y -> env (0 :|: y)) [1..])
+  distToRight = fromMaybe (error "unbound grid") $ elemIndex Wall (map (\x -> env (x :|: 0)) [1..])
+  phase = if even distToTop
+    then L
+    else R
+
+  getPositionValue pos | (not.isFree.env) pos = infty
+                       | null safePathToTail = infty - 1 - len pathToTail
+                       | isAppel (env pos) = 0
+                       | null pathToAppel = (infty / 2) - len pathToTail
+                       | otherwise        = len pathToAppel + 1 / len pathToTail 
+    where
+    [pathToAppel, pathToTail, safePathToTail] = getPhaselessPaths (quickNext env) pos [const (isAppel .), const isTailEndAdjacent, \n -> (isSafeTail n .)]
+    score = (ttl.env) (0 :|: 0)
+
+    isSafeTail stepsPassed (Snek _ n) = stepsPassed > n
+    isSafeTail _           _          = False
+
+{-tailFinder :: PurePolicy
 tailFinder env = fst (traceShowId $ argmin snd ([(action, getPositionValue (relDir action)) | action <- actions]))
   where
   distToTop   = fromMaybe (error "unbound grid") $ elemIndex Wall (map (\y -> env (0 :|: y)) [1..])
@@ -137,7 +157,7 @@ tailFinder env = fst (traceShowId $ argmin snd ([(action, getPositionValue (relD
     score = (ttl.env) (0 :|: 0)
 
     isSafeTail stepsPassed (Snek _ n) = stepsPassed > n
-    isSafeTail _           _          = False
+    isSafeTail _           _          = False-}
 
 
 

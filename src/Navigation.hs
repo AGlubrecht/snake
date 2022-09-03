@@ -102,6 +102,26 @@ getPhasePaths board initialPosition targetTests ={-} traceShow headDirection $ -
 
     headDirection = neighborhood (0 :|: 0)
 
+getPhaselessPaths :: Board -> Position -> [TargetTest2] -> [[Position]]
+getPhaselessPaths board initialPosition targetTests = evalState
+  (multiBFS2 board neighborhood initialPosition targetTests)
+  (
+    SearchState2
+    [initialPosition] 
+    Map.empty
+    Set.empty 
+    1 --unsafety
+    (map (const Nothing) targetTests)
+  )
+
+  where
+    distToTop   = fromMaybe (error "unbound grid") $ elemIndex Wall (map (\y -> board (0 :|: y)) [1..])
+    distToRight = fromMaybe (error "unbound grid") $ elemIndex Wall (map (\x -> board (x :|: 0)) [1..])
+
+    neighborhood = neumannNeighborhood
+
+    headDirection = neighborhood (0 :|: 0)
+
 multiBFS2 :: Board -> (Position -> [Position]) -> Position -> [TargetTest2] -> State SearchState2 [[Position]]
 multiBFS2 board neighborhoodF initialPos targetTests = do
   SearchState2 searchList parents visited pathLength targets <- get
