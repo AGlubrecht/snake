@@ -29,6 +29,7 @@ type PurePolicy = Board -> Action
 type ActionPicker = (Action -> Float) -> Action
 type Distribution = Action -> Float
 type TargetTest = Int -> CellState -> Bool
+type TargetTest2 = Int -> Board -> Position -> Bool
 
 
 data Game = Game {

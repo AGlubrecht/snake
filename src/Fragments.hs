@@ -28,6 +28,14 @@ monadicFinder env = safeAction env (maybe (avoider env) goTowards nextPathPos)
 {-
 
 
+data SearchState2 = SearchState2
+  {
+    searchSet2 :: Set.Set Position,
+    parentOf2 :: Array Position (Maybe Position),
+    arrBoard2 :: Array Position CellState,
+    pathLength2 :: Int
+  }
+
 {-getPath :: Board -> Position -> Position -> [Position]
 getPath board initialPosition targetPosition = evalState
   (latticeBFS initialPosition targetPosition)

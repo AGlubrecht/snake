@@ -13,7 +13,7 @@ import System.Random     ( RandomGen(split) )
 import Data.Array        ( Array, (!), (//), array, bounds )
 import Data.Sequence     ( (<|), replicate, Seq((:<|), Empty, (:|>)) )
 import Data.Foldable     ( Foldable(toList) )
-import Data.List         ( nub )
+import Data.List         ( nub, reverse)
 
 import Types
 
@@ -103,8 +103,8 @@ moveHead g@(Game arrBoard players apples rGen rPicks clearcount settings)
           (snakeHead', direction') = apply p g rPick snakeHead direction policy
           rCoord:rCoords           = clearCoords arrBoard rGen
           rPick:rPicks'            = rPicks
-          snakeTailAssocs          = (snakeEnd, Clear) 
-                                      : zip (toList snakeInits) (map (Snek _id) ((score -) <$> [1..]))
+          snakeTailAssocs          = reverse ((snakeEnd, Clear) 
+                                      : zip (toList snakeInits) (map (Snek _id) ((score -) <$> [1..])))
 
           decay   = g{ 
               players    = p{ status = Dead, snake = snakeInits }:players, 

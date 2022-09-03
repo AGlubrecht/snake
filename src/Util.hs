@@ -5,6 +5,9 @@ import Data.List ( findIndices, minimumBy, maximumBy )
 
 {- GENERAL -}
 
+safeMin :: (Ord a, Num a) => [a] -> a
+safeMin ns = minimum (infty:ns)
+
 safeHead :: [a] -> Maybe a
 safeHead [] = Nothing
 safeHead (a:as) = Just a

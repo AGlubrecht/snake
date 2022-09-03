@@ -117,7 +117,7 @@ dnnMeanCrossover (DNN f a, DNN _ b) = DNN f <$> bernoulliPick
 exampleGame :: IO Game
 exampleGame = toIO $ createGame 
                 (GameSettings
-                  (StartSettings 1 20 16)
+                  (StartSettings 1 1000 16)
                   (IterationSettings 0 True 20))
                 [(toTotP . fromPureP) restrictedTailFinder] 
 

@@ -80,7 +80,7 @@ multiBFS initialPos targetTests = do
         put (SearchState searchList' parentOf' arrBoard' pathLength' targets')
         multiBFS initialPos targetTests
 
-getPhasePaths :: Board -> Position -> [TargetTest] -> [[Position]]
+getPhasePaths :: Board -> Position -> [TargetTest2] -> [[Position]]
 getPhasePaths board initialPosition targetTests ={-} traceShow headDirection $ -}evalState
   (multiBFS2 board neighborhood initialPosition targetTests)
   (
@@ -102,7 +102,7 @@ getPhasePaths board initialPosition targetTests ={-} traceShow headDirection $ -
 
     headDirection = neighborhood (0 :|: 0)
 
-multiBFS2 :: Board -> (Position -> [Position]) -> Position -> [TargetTest] -> State SearchState2 [[Position]]
+multiBFS2 :: Board -> (Position -> [Position]) -> Position -> [TargetTest2] -> State SearchState2 [[Position]]
 multiBFS2 board neighborhoodF initialPos targetTests = do
   SearchState2 searchList parents visited pathLength targets <- get
   let generatePathTo Nothing = []
@@ -120,7 +120,7 @@ multiBFS2 board neighborhoodF initialPos targetTests = do
 
             searchList' = (uniqueify . concat) childrens
 
-            getTargetPos (Nothing, targetTest) = find (targetTest pathLength . board) searchList'
+            getTargetPos (Nothing, targetTest) = find (targetTest pathLength board) searchList'
             getTargetPos (justPos, _)          = justPos
 
             targets' = zipWith (curry getTargetPos) targets targetTests

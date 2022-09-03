@@ -96,7 +96,7 @@ restrictedTailFinder env = fst (argmin snd [(action, getPositionValue (relDir ac
     tailLengthLag = score - entireTailLength-}
 
 restrictedTailFinder :: PurePolicy
-restrictedTailFinder env = fst (argmin snd ([(action, getPositionValue (relDir action)) | action <- [F, phase]]))
+restrictedTailFinder env = fst (traceShowId $ argmin snd ([(action, getPositionValue (relDir action)) | action <- [F, phase]]))
   where
   distToTop   = fromMaybe (error "unbound grid") $ elemIndex Wall (map (\y -> env (0 :|: y)) [1..])
   distToRight = fromMaybe (error "unbound grid") $ elemIndex Wall (map (\x -> env (x :|: 0)) [1..])
@@ -104,14 +104,13 @@ restrictedTailFinder env = fst (argmin snd ([(action, getPositionValue (relDir a
     then L
     else R
 
-  getPositionValue pos | (not.isFree.env) pos = infty+1 -- There's something happening here, but I don't know what it is :(      
-                       | null pathToTail  = infty --apparently, trace doesn't work right in local functions. This is the best option often, which doesn't mak any sense
-                       | null safePathToTail = infty - len pathToTail
+  getPositionValue pos | (not.isFree.env) pos = infty+1
+                       | null safePathToTail = infty - 1 - len pathToTail
                        | isAppel (env pos) = 0
                        | null pathToAppel = (infty / 2) - len pathToTail
                        | otherwise        = len pathToAppel + 1 / len pathToTail 
     where
-    [pathToAppel, pathToTail, safePathToTail] = getPhasePaths (quickNext env) pos [const isAppel, const isTail, isSafeTail]
+    [pathToAppel, pathToTail, safePathToTail] = getPhasePaths (quickNext env) pos [const (isAppel .), const isTailEndAdjacent, \n -> (isSafeTail n .)]
     score = (ttl.env) (0 :|: 0)
 
     isSafeTail stepsPassed (Snek _ n) = stepsPassed > n

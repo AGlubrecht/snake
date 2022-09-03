@@ -13,7 +13,7 @@ import Types
       Action(..),
       ActionPicker, Player (_id) )
 
-import Util   ( infty, mapPair )
+import Util   ( infty, mapPair, safeMin )
 import Random ( getRandomR, Contingent )
 
 
@@ -155,9 +155,13 @@ isTail :: CellState -> Bool
 isTail (Snek _ _) = True 
 isTail _           = False
 
-isSnake :: CellState -> Bool
-isSnake (Snek _ _) = True
-isSnake _ = False
+isTailEnd :: Board -> Position -> Bool
+isTailEnd board pos = case board pos of
+  (Snek _ n) -> safeMin (filter (/= 0) ( ttl.board <$> neumannNeighborhood pos)) > n
+  _          -> False
+
+isTailEndAdjacent :: Board -> Position -> Bool
+isTailEndAdjacent board pos = any (isTailEnd board) (neumannNeighborhood pos)
 
 ttl :: CellState -> Int
 ttl Wall       = infty
