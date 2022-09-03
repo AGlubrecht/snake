@@ -25,6 +25,15 @@ data SearchState = SearchState
     targets :: [Maybe Position]
   }
 
+data SearchState2 = SearchState2
+  {
+    searchList2 :: [Position],
+    parents2 :: Map.Map Position Position,
+    visited2 ::  Set.Set Position,
+    pathLength2 :: Int,
+    targets2 :: [Maybe Position]
+  }
+
 getPaths :: Board -> Position -> [TargetTest] -> [[Position]]
 getPaths board initialPosition targetTests = evalState
   (multiBFS initialPosition targetTests)
@@ -73,13 +82,12 @@ multiBFS initialPos targetTests = do
 
 getPhasePaths :: Board -> Position -> [TargetTest] -> [[Position]]
 getPhasePaths board initialPosition targetTests ={-} traceShow headDirection $ -}evalState
-  (multiBFS2 neighborhood initialPosition targetTests)
+  (multiBFS2 board neighborhood initialPosition targetTests)
   (
-    SearchState 
+    SearchState2
     [initialPosition] 
-    (array (boundsOf searchRange) [(x:|:y, Nothing) | x <- [-searchRange.. searchRange-1],
-                                                      y <- [-searchRange.. searchRange-1]])
-    (toArr searchRange board) 
+    Map.empty
+    Set.empty 
     0 --unsafety
     (map (const Nothing) targetTests)
   )
@@ -94,49 +102,43 @@ getPhasePaths board initialPosition targetTests ={-} traceShow headDirection $ -
 
     headDirection = neighborhood (0 :|: 0)
 
-multiBFS2 :: (Position -> [Position]) -> Position -> [TargetTest] -> State SearchState [[Position]]
-multiBFS2 neighborhood initialPos targetTests = do
-  SearchState searchList parentOf arrBoard pathLength targets <- get
+multiBFS2 :: Board -> (Position -> [Position]) -> Position -> [TargetTest] -> State SearchState2 [[Position]]
+multiBFS2 board neighborhoodF initialPos targetTests = do
+  SearchState2 searchList parents visited pathLength targets <- get
   let generatePathTo Nothing = []
       generatePathTo (Just pos) = reverse $ pathFrom pos
-      pathFrom pos = case parentOf!pos of
+      pathFrom pos = case Map.lookup pos parents of
         Nothing      -> []
         Just prevPos -> pos:pathFrom prevPos
 
   if null searchList || (Nothing `notElem` targets) 
     then return (map generatePathTo targets)
     else do
-        let isFree pos = pos /= (0 :|: 0) && ttl (fromArr arrBoard pos) <= pathLength
+        let isFree pos = ttl (board pos) <= pathLength && not (Set.member pos visited)
 
-            childrens = map (filter isFree . neighborhood) searchList
+            childrens = map (filter isFree . neighborhoodF) searchList
 
             searchList' = (uniqueify . concat) childrens
 
-            getTargetPos (Nothing, targetTest) = find (targetTest pathLength . (arrBoard!)) searchList'
+            getTargetPos (Nothing, targetTest) = find (targetTest pathLength . board) searchList'
             getTargetPos (justPos, _)          = justPos
 
             targets' = zipWith (curry getTargetPos) targets targetTests
 
-            parentOf' = parentOf // concat [zip children (repeat $ Just parent) 
-                    | (children, parent) <- zip childrens searchList]
+            parents' = Map.union parents (Map.fromList $ concat [zip children (repeat parent) 
+                    | (children, parent) <- zip childrens searchList])
             
-            arrBoard' = arrBoard // zip searchList (repeat Wall) --should be Snek ? (score+pathlength) Wall, but sneks don't know their own score
+            --arrBoard' = arrBoard // zip searchList (repeat Wall) --should be Snek ? (score+pathlength) Wall, but sneks don't know their own score
+            visited' = Set.union visited (Set.fromList searchList)
 
             pathLength' = pathLength+1
 
-        put (SearchState searchList' parentOf' arrBoard' pathLength' targets')
-        multiBFS initialPos targetTests
+        put (SearchState2 searchList' parents' visited' pathLength' targets')
+        multiBFS2 board neighborhoodF initialPos targetTests
 
 uniqueify :: Ord a => [a] -> [a]
 uniqueify = Set.elems . Set.fromList
 
-data SearchState2 = SearchState2
-  {
-    searchSet2 :: Set.Set Position,
-    parentOf2 :: Array Position (Maybe Position),
-    arrBoard2 :: Array Position CellState,
-    pathLength2 :: Int
-  }
 
 
 
